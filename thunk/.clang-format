@@ -1,0 +1,20 @@
+---
+BasedOnStyle: LLVM
+
+AllowShortEnumsOnASingleLine: false
+AlwaysBreakTemplateDeclarations: Yes
+BinPackArguments: false
+BinPackParameters: false
+BraceWrapping:
+  AfterClass: true
+  AfterEnum: true
+  AfterStruct: true
+  AfterUnion: true
+  AfterFunction: true
+  AfterNamespace: true
+  AfterExternBlock: true
+BreakBeforeBraces: Custom
+IndentWidth: 4
+NamespaceIndentation: All
+TabWidth: 4
+UseTab: ForIndentation

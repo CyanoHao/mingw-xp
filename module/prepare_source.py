@@ -208,15 +208,6 @@ def _gcc(ver: str, info: ProfileInfo, paths: ProjectPaths):
       else:
         pass  # disable UTF-8 manifest later
 
-    # Disable `_aligned_malloc`
-    if info.target_winnt <= 0x0500:
-      if v.major >= 14:
-        _patch(paths.gcc, paths.patch / 'gcc' / 'disable-aligned-malloc_14.patch')
-      elif v.major >= 9:
-        _patch(paths.gcc, paths.patch / 'gcc' / 'disable-aligned-malloc_9.patch')
-      elif v.major >= 7:
-        _patch(paths.gcc, paths.patch / 'gcc' / 'disable-aligned-malloc_7.patch')
-
     # Fix libbacktrace
     if v.major >= 15 and info.host_winnt <= 0x0500:
       _patch(paths.gcc, paths.patch / 'gcc' / 'fix-backtrace_nt50-15.patch')

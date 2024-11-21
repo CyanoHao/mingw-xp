@@ -9,31 +9,6 @@
 #include <type_traits>
 
 namespace Win32Thunk {
-  inline DWORD WINAPI GetConsoleProcessList(
-    LPDWORD lpdwProcessList,
-    DWORD dwProcessCount
-  ) {
-    using type = decltype(&::GetConsoleProcessList);
-    static type real = (type) GetProcAddress(GetModuleHandleA("kernel32.dll"), "GetConsoleProcessList");
-    if (real)
-      return real(lpdwProcessList, dwProcessCount);
-
-    return 0;
-  }
-
-  inline UINT WINAPI GetSystemWow64DirectoryA(
-    LPSTR lpBuffer,
-    UINT uSize
-  ) {
-    using type = decltype(&::GetSystemWow64DirectoryA);
-    static type real = (type) GetProcAddress(GetModuleHandleA("kernel32.dll"), "GetSystemWow64DirectoryA");
-    if (real)
-      return real(lpBuffer, uSize);
-
-    SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
-    return 0;
-  }
-
   inline void WSAAPI freeaddrinfo(
     _In_ PADDRINFOA pAddrInfo
   ) {

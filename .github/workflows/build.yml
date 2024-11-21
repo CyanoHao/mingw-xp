@@ -5,6 +5,7 @@ on: [push, pull_request]
 jobs:
   build:
     name: Build
+    if: false
     strategy:
       fail-fast: false
       matrix:

@@ -18,33 +18,6 @@ static int Win32Thunk_Detail_IsNt()
   return isNt;
 }
 
-// corresponding to TryEnterCriticalSection implementation
-static void Win32Thunk_DeleteCriticalSection(
-  _Inout_ LPCRITICAL_SECTION lpCriticalSection
-) {
-  if (Win32Thunk_Detail_IsNt())
-    return DeleteCriticalSection(lpCriticalSection);
-
-  HANDLE h = *(HANDLE *)lpCriticalSection;
-  CloseHandle(h);
-  return;
-}
-
-// corresponding to TryEnterCriticalSection implementation
-static void Win32Thunk_EnterCriticalSection(
-  _Inout_ LPCRITICAL_SECTION lpCriticalSection
-) {
-  if (Win32Thunk_Detail_IsNt())
-    return EnterCriticalSection(lpCriticalSection);
-
-  HANDLE h = *(HANDLE *)lpCriticalSection;
-  DWORD r = WaitForSingleObject(h, INFINITE);
-  if (r != WAIT_OBJECT_0)
-    // EXCEPTION_POSSIBLE_DEADLOCK
-    RaiseException((LONG)0xC0000194, 0, 0, NULL);
-  return;
-}
-
 // not work in Windows 9x
 static BOOL Win32Thunk_GetHandleInformation(
   _In_ HANDLE hObject,
@@ -55,18 +28,6 @@ static BOOL Win32Thunk_GetHandleInformation(
 
   // only return value matters
   return TRUE;
-}
-
-// corresponding to TryEnterCriticalSection implementation
-static void Win32Thunk_InitializeCriticalSection(
-  _Out_ LPCRITICAL_SECTION lpCriticalSection
-) {
-  if (Win32Thunk_Detail_IsNt())
-    return InitializeCriticalSection(lpCriticalSection);
-
-  HANDLE h = CreateMutex(NULL, FALSE, NULL);
-  *(HANDLE *)lpCriticalSection = h;
-  return;
 }
 
 // Windows 98
@@ -84,17 +45,6 @@ static BOOL Win32Thunk_IsDebuggerPresent()
     return real();
 
   return FALSE;
-}
-
-// corresponding to TryEnterCriticalSection implementation
-static void Win32Thunk_LeaveCriticalSection(
-  _Inout_ LPCRITICAL_SECTION lpCriticalSection
-) {
-  if (Win32Thunk_Detail_IsNt())
-    return LeaveCriticalSection(lpCriticalSection);
-
-  HANDLE h = *(HANDLE *)lpCriticalSection;
-  ReleaseMutex(h);
 }
 
 // Windows 98
@@ -117,33 +67,6 @@ static BOOL Win32Thunk_SetProcessAffinityMask(
   return FALSE;
 }
 
-// Windows 98; not work in Windows 9x
-static BOOL Win32Thunk_TryEnterCriticalSection(
-  _Inout_ LPCRITICAL_SECTION lpCriticalSection
-) {
-  typedef typeof (&TryEnterCriticalSection) type;
-  static type real = 0;
-  static int realInit = 0;
-
-  if (Win32Thunk_Detail_IsNt()) {
-    if (!realInit) {
-      real = (type)GetProcAddress(GetModuleHandleA("kernel32.dll"), "TryEnterCriticalSection");
-      realInit = 1;
-    }
-    return real(lpCriticalSection);
-  }
-
-  // use kernel-mode mutex
-  HANDLE h = *(HANDLE *)lpCriticalSection;
-  DWORD r = WaitForSingleObject(h, 0);
-  return r == WAIT_OBJECT_0;
-}
-
-#define DeleteCriticalSection Win32Thunk_DeleteCriticalSection
-#define EnterCriticalSection Win32Thunk_EnterCriticalSection
 #define GetHandleInformation Win32Thunk_GetHandleInformation
-#define InitializeCriticalSection Win32Thunk_InitializeCriticalSection
 #define IsDebuggerPresent Win32Thunk_IsDebuggerPresent
-#define LeaveCriticalSection Win32Thunk_LeaveCriticalSection
 #define SetProcessAffinityMask Win32Thunk_SetProcessAffinityMask
-#define TryEnterCriticalSection Win32Thunk_TryEnterCriticalSection

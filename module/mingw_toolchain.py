@@ -33,7 +33,7 @@ def _gmp(ver: str, paths: ProjectPaths, info: ProfileInfo, jobs: int):
     '--disable-assembly',
     '--enable-static',
     '--disable-shared',
-    *cflags_host(),
+    *cflags_host(c_extra = ['-std=gnu11']),
   ])
   make_default('gmp', build_dir, jobs)
   make_install('gmp', build_dir)
@@ -161,7 +161,7 @@ def _iconv(ver: str, paths: ProjectPaths, info: ProfileInfo, jobs: int):
     '--disable-nls',
     '--enable-static',
     '--disable-shared',
-    *cflags_host(),
+    *cflags_host(c_extra = ['-std=gnu11']),
   ])
   make_default('iconv', build_dir, jobs)
   make_install('iconv', build_dir)
